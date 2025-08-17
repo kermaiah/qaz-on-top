@@ -3,17 +3,14 @@ local UserInputService = game:GetService("UserInputService")
 local StarterGui = game:GetService("StarterGui")
 local Workspace = game:GetService("Workspace")
 
--- State
 local autoPressEnabled = false
 
--- CFrame / Size presets
 local ENABLED_CFRAME = CFrame.new(561.808411, 1.90603209, -280.448639, 0, 0, -1, 0, 1, 0, 1, 0, 0)
 local ENABLED_SIZE = Vector3.new(10, 10, 10)
 
 local DISABLED_CFRAME = CFrame.new(546.966064, -0.535936713, -396.153412, 3.57627869e-07, -0.999999285, -0.0012207774, 1, 3.57627869e-07, 2.32830644e-10, 2.32830644e-10, -0.0012207774, 0.999999225)
 local DISABLED_SIZE = Vector3.new(1.3463988304138184, 7.32063102722168, 7.2016777992248535)
 
--- Notification helper
 local function notifyStatus(status)
 	local title = "Status: " .. tostring(status)
 	local text = status and "on'ed na nh'ay" or "off'ed na nh'ay"
@@ -37,7 +34,6 @@ local function notifyInstructions()
 	end)
 end
 
--- Wait for parts
 local function waitForParts()
 	repeat task.wait() until Workspace:FindFirstChild("System")
 		and Workspace.System:FindFirstChild("DeliveryBoxes")
@@ -53,28 +49,26 @@ local function waitForParts()
 	local partDuplicate = part:Clone()
 	partDuplicate.Name = part.Name .. "_Duplicate"
 	partDuplicate.Parent = part.Parent
-	partDuplicate.Transparency = 1 -- start hidden
+	partDuplicate.Transparency = 1
 	partDuplicate.CanCollide = false
 
 	return part, partDuplicate, prompt
 end
 
--- Set CFrame / Size and Transparency based on toggle
 local function setPartTransform(part, partDuplicate)
 	if autoPressEnabled then
 		part.CFrame = ENABLED_CFRAME
 		part.Size = ENABLED_SIZE
-		part.Transparency = 1       -- original fully invisible when ON
-		partDuplicate.Transparency = 0.4 -- duplicate visible when ON
+		part.Transparency = 1
+		partDuplicate.Transparency = 0.4
 	else
 		part.CFrame = DISABLED_CFRAME
 		part.Size = DISABLED_SIZE
-		part.Transparency = 0.4     -- original partially visible when OFF
-		partDuplicate.Transparency = 1 -- duplicate hidden when OFF
+		part.Transparency = 0.4
+		partDuplicate.Transparency = 1
 	end
 end
 
--- Watch for part being refreshed or re-rendered
 local function watchPart(part)
 	part.AncestryChanged:Connect(function()
 		task.wait(0.1)
@@ -91,13 +85,11 @@ local function watchPart(part)
 	end)
 end
 
--- Setup
 local part, partDuplicate, prompt = waitForParts()
 setPartTransform(part, partDuplicate)
 watchPart(part)
-notifyInstructions() -- ✅ Only this runs on start
+notifyInstructions()
 
--- Keybind (F) toggle with notification and update CFrame/Size
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
 	if not gameProcessed and input.KeyCode == Enum.KeyCode.F then
 		autoPressEnabled = not autoPressEnabled
@@ -106,7 +98,6 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
 	end
 end)
 
--- Auto press E when active
 RunService.Heartbeat:Connect(function()
 	if autoPressEnabled and prompt and prompt:IsDescendantOf(Workspace) then
 		pcall(function()
